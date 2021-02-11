@@ -1,0 +1,94 @@
+---
+title: "Figure3.7"
+author: "Ricky"
+date: "2/9/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Step 1 Draw power curves and box
+
+For n = 100, p in range of 0.4 to 1, we can drew power curves with different m. First, we draw curves with m in range of 60 to 80, steps by 2.
+
+For the picture we have got, we can add a box from 0.6 to 0.8, and bottom and top at height 0.05 and 0.95.
+
+```{r}
+p <- NA
+a <- NA
+n <- 100
+
+for (t in 1:10){
+  m = 60 + 2*(t-1)
+  for (i in  1:100){
+  p[i] = 0.4+0.006*(i-1)
+  a[i] <- 1-pbinom(m-1, n, p[i])
+}
+plot(p,a,type = "l")
+
+par(new=TRUE)
+}
+
+rect(0.6,0.05,0.8,0.95)
+```
+
+### Step 2 Calculate the range of m
+
+From the picture we have got, we can find that, some curves has the $\alpha$ value more than 0.05 when given the p = 0.6. Also when given p = 0.8, some curves has a $\beta$ value more than 0.05. 
+
+So take this two criterion, we can calculate the range of m.
+
+1. type 1 error criterion: p = 0.6, a < 0.05
+
+2. type 2 error criterion: p = 0.8, b < 0.05
+
+```{r}
+b <- NA
+
+for (m in 1:100){
+  for (i in  1:100){
+  a[m] <- 1-pbinom(m-1, n, 0.6)
+  b[m] <- 1-a[m]
+  }
+}
+
+M <- which(a < 0.05)
+M1 <- M[1]
+
+for (m in 1:100){
+  for (i in  1:100){
+  a[m] <- 1-pbinom(m-1, n, 0.8)
+  b[m] <- 1-a[m]
+  }
+}
+
+M <- which(b < 0.05)
+M2 <- M[length(M)]
+
+cat("Rannge of M:[",M1,",",M2,"]")
+```
+
+### Step 3 Drew the Power Curve of figure 7.3
+
+```{r}
+for (i in  1:100){
+  p[i] = 0.4+0.006*(i-1)
+  a[i] <- 1-pbinom(M1-1, n, p[i])
+}
+plot(p,a,type = "l")
+
+par(new=TRUE)
+
+for (i in  1:100){
+  p[i] = 0.4+0.006*(i-1)
+  a[i] <- 1-pbinom(M2-1, n, p[i])
+}
+plot(p,a,type = "l")
+rect(0.6,0.05,0.8,0.95)
+```
+
+So When m increases, we will expect the power curve moves to right side, and the decrease of $\alpha$, and expect the increase of $\beta$. When we want to get less type 1 error, then we will choose a lager m, but no more than 73, the criterion for type 2 error; also when we want to get less type 2 error, then we will choose a smaller m, but no less than 69, the criterion for type 1 error.
